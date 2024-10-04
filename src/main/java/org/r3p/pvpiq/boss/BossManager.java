@@ -16,7 +16,7 @@ public class BossManager {
         bosses.add(new BossInfo("Przywodca Klanu Zlodziei", Arrays.asList("Przywodce Klanu Zlodziei"), 60));
         bosses.add(new BossInfo("Krolowa Pajakow", Arrays.asList("Krolowa Pajakow"), 30));
         bosses.add(new BossInfo("Dzikolud", Arrays.asList("Dzikoluda"), 40));
-        bosses.add(new BossInfo("Przywodca Orkow", Arrays.asList("Przywodce Orkow"), 90));
+        bosses.add(new BossInfo("Dowodca Orkow", Arrays.asList("Dowodca Orkow"), 90));
     }
 
     public static List<BossInfo> getBosses() {

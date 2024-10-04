@@ -7,10 +7,7 @@ import org.r3p.pvpiq.config.ConfigHandler;
 
 import java.io.IOException;
 
-public class TimerEditGui extends GuiScreen {
-
-    public TimerEditGui() {
-    }
+public class EditGuiLocations extends GuiScreen {
 
     @Override
     public void initGui() {
@@ -27,13 +24,14 @@ public class TimerEditGui extends GuiScreen {
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
+        PvpIQ.profitTrackerOverlay.handleMouseInput();
         PvpIQ.timerOverlay.handleMouseInput();
     }
 
     @Override
     public void handleKeyboardInput() throws IOException {
         super.handleKeyboardInput();
-        if (PvpIQ.editTimersKey.isPressed()) {
+        if (PvpIQ.editGuiLocationsKey.isPressed()) {
             Minecraft.getMinecraft().displayGuiScreen(null);
         }
     }
@@ -41,7 +39,9 @@ public class TimerEditGui extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        PvpIQ.timerOverlay.renderTimers(true);
+        boolean isEditing = PvpIQ.keyInputHandler.isEditing();
+        PvpIQ.profitTrackerOverlay.renderOverlay(isEditing);
+        PvpIQ.timerOverlay.renderOverlay(isEditing);
     }
 
     @Override

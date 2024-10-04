@@ -4,8 +4,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraft.client.Minecraft;
 import org.r3p.pvpiq.PvpIQ;
-import org.r3p.pvpiq.gui.BossSelectionGui;
-import org.r3p.pvpiq.gui.TimerEditGui;
+import org.r3p.pvpiq.gui.EditGuiLocations;
+import org.r3p.pvpiq.gui.FeaturesManagerGui;
 
 public class KeyInputHandler {
 
@@ -17,15 +17,16 @@ public class KeyInputHandler {
             PvpIQ.chatEventHandler.toggleMode();
         }
         if (PvpIQ.openGuiKey.isPressed()) {
-            Minecraft.getMinecraft().displayGuiScreen(new BossSelectionGui());
+            Minecraft.getMinecraft().displayGuiScreen(new FeaturesManagerGui());
         }
-        if (PvpIQ.editTimersKey.isPressed()) {
+        if (PvpIQ.editGuiLocationsKey.isPressed()) {
             if (!isEditing) {
                 isEditing = true;
-                Minecraft.getMinecraft().displayGuiScreen(new TimerEditGui());
+                this.setEditing(true);
+                Minecraft.getMinecraft().displayGuiScreen(new EditGuiLocations());
             } else {
-                // Close edit mode if already editing
                 isEditing = false;
+                this.setEditing(false);
                 Minecraft.getMinecraft().displayGuiScreen(null);
             }
         }

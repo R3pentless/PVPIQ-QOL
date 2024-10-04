@@ -8,6 +8,7 @@ import net.minecraft.util.ChatComponentText;
 import org.r3p.pvpiq.boss.BossInfo;
 import org.r3p.pvpiq.boss.BossManager;
 import org.r3p.pvpiq.config.ConfigHandler;
+import org.r3p.pvpiq.PvpIQ;
 
 import java.text.Normalizer;
 import java.util.regex.Pattern;
@@ -74,6 +75,7 @@ public class ChatEventHandler {
             return;
         }
         String messageNoDiacritics = removeDiacritics(message).toLowerCase();
+
         for (BossInfo boss : BossManager.getBosses()) {
             List<String> namesToCheck = new ArrayList<>();
             namesToCheck.add(boss.getBossName());
@@ -95,6 +97,97 @@ public class ChatEventHandler {
                 }
             }
         }
+
+        if (message.startsWith("Polow zakonczony powodzeniem")) {
+            calculatePriceFromMessage(message);
+        }
+    }
+
+    private void calculatePriceFromMessage(String message) {
+        String cleanedMessage = message.replaceAll("§[0-9a-fk-or]", "");
+
+        String[] parts = cleanedMessage.split("wylowiles:");
+        if (parts.length < 2) return;
+
+        String fishInfo = parts[1].trim();
+
+        if (fishInfo.contains("Rozdymka")) {
+            PvpIQ.profitTrackerOverlay.addRozdymka();
+            return;
+        } else if (fishInfo.contains("Rybka Nemo")) {
+            PvpIQ.profitTrackerOverlay.addNemo();
+            return;
+        } else if (fishInfo.contains("Skrzynia Rybaka")) {
+            PvpIQ.profitTrackerOverlay.addChest();
+            return;
+        }
+
+        String fishName = fishInfo.split("\\(Ciezar")[0].trim();
+
+        int weight = 0;
+        int length = 0;
+
+        java.util.regex.Matcher weightMatcher = java.util.regex.Pattern.compile("\\(\\s*Ciezar\\s*:\\s*(\\d+)g\\s*\\)").matcher(fishInfo);
+        if (weightMatcher.find()) {
+            weight = Integer.parseInt(weightMatcher.group(1));
+        }
+
+        java.util.regex.Matcher lengthMatcher = java.util.regex.Pattern.compile("\\(\\s*Dlugosc\\s*:\\s*(\\d+)cm\\s*\\)").matcher(fishInfo);
+        if (lengthMatcher.find()) {
+            length = Integer.parseInt(lengthMatcher.group(1));
+        }
+
+        int price = calculateFishPrice(fishName, weight, length);
+
+        PvpIQ.profitTrackerOverlay.addProfit(price);
+        PvpIQ.profitTrackerOverlay.addFish();
+    }
+
+    private int calculateFishPrice(String fishName, int weight, int length) {
+        int basePrice = 0;
+        int lengthMultiplier = 0;
+        int weightMultiplier = 0;
+
+        switch (fishName) {
+            case "Surowa Ryba":
+                basePrice = 2000;
+                break;
+            case "Pieczona Ryba":
+                basePrice = 4000;
+                break;
+            case "Surowy Losos":
+                basePrice = 10000;
+                break;
+            case "Pieczony Losos":
+                basePrice = 35000;
+                break;
+            case "Karas":
+                basePrice = 1000;
+                lengthMultiplier = 12;
+                weightMultiplier = 5;
+                break;
+            case "Losos":
+                basePrice = 2200;
+                lengthMultiplier = 16;
+                weightMultiplier = 6;
+                break;
+            case "Karp":
+                basePrice = 8000;
+                lengthMultiplier = 20;
+                weightMultiplier = 8;
+                break;
+            case "Okon":
+                basePrice = 25000;
+                lengthMultiplier = 40;
+                weightMultiplier = 12;
+                break;
+            default:
+                basePrice = 1000;
+                break;
+        }
+
+        int finalPrice = basePrice + (length * lengthMultiplier) + (weight * weightMultiplier);
+        return finalPrice;
     }
 
     @SubscribeEvent
@@ -105,7 +198,6 @@ public class ChatEventHandler {
             String bossName = entry.getKey();
             long timeLeft = entry.getValue() - System.currentTimeMillis();
             if (timeLeft <= 0) {
-                // Timer expired
             } else {
                 long minutesLeft = timeLeft / 60000;
                 if (minutesLeft <= ConfigHandler.alertBeforeMinutes && !alertSent.getOrDefault(bossName, false)) {
