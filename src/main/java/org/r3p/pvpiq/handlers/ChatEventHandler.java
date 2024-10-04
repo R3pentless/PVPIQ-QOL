@@ -1,10 +1,13 @@
-package org.r3p.pvpiq;
+package org.r3p.pvpiq.handlers;
 
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
+import org.r3p.pvpiq.boss.BossInfo;
+import org.r3p.pvpiq.boss.BossManager;
+import org.r3p.pvpiq.config.ConfigHandler;
 
 import java.text.Normalizer;
 import java.util.regex.Pattern;
@@ -16,17 +19,9 @@ import java.util.ArrayList;
 public class ChatEventHandler {
     private Map<String, Long> bossTimers = new HashMap<>();
     private boolean isAkademiaMode = false;
-    private Map<String, Boolean> visibleBosses = new HashMap<>();
     private Map<String, Boolean> alertSent = new HashMap<>();
 
     public ChatEventHandler() {
-        for (BossInfo boss : BossManager.getBosses()) {
-            boolean isVisible = true;
-            if (ConfigHandler.visibleBosses != null && !ConfigHandler.visibleBosses.isEmpty()) {
-                isVisible = ConfigHandler.visibleBosses.contains(boss.getBossName());
-            }
-            visibleBosses.put(boss.getBossName(), isVisible);
-        }
         isAkademiaMode = ConfigHandler.isAkademiaMode;
     }
 
@@ -34,7 +29,8 @@ public class ChatEventHandler {
         isAkademiaMode = !isAkademiaMode;
         String mode = isAkademiaMode ? "Akademia" : "Glowny Server";
         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("Przelaczono na tryb " + mode + "."));
-        ConfigHandler.saveMode(isAkademiaMode);
+        ConfigHandler.isAkademiaMode = isAkademiaMode;
+        ConfigHandler.saveMode();
     }
 
     public boolean isAkademiaMode() {
@@ -42,23 +38,19 @@ public class ChatEventHandler {
     }
 
     public void toggleBossVisibility(String bossName) {
-        boolean currentVisibility = visibleBosses.getOrDefault(bossName, true);
-        visibleBosses.put(bossName, !currentVisibility);
-        saveVisibleBossesToConfig();
-    }
-
-    private void saveVisibleBossesToConfig() {
-        List<String> bossesToSave = new ArrayList<>();
-        for (Map.Entry<String, Boolean> entry : visibleBosses.entrySet()) {
-            if (entry.getValue()) {
-                bossesToSave.add(entry.getKey());
-            }
+        if (ConfigHandler.visibleBosses.contains(bossName)) {
+            ConfigHandler.visibleBosses.remove(bossName);
+        } else {
+            ConfigHandler.visibleBosses.add(bossName);
         }
-        ConfigHandler.saveVisibleBosses(bossesToSave);
+        ConfigHandler.saveVisibleBosses();
     }
 
     public boolean isBossVisible(String bossName) {
-        return visibleBosses.getOrDefault(bossName, true);
+        if (ConfigHandler.visibleBosses == null || ConfigHandler.visibleBosses.isEmpty()) {
+            return true;
+        }
+        return ConfigHandler.visibleBosses.contains(bossName);
     }
 
     public Map<String, Long> getBossTimers() {
@@ -113,6 +105,7 @@ public class ChatEventHandler {
             String bossName = entry.getKey();
             long timeLeft = entry.getValue() - System.currentTimeMillis();
             if (timeLeft <= 0) {
+                // Timer expired
             } else {
                 long minutesLeft = timeLeft / 60000;
                 if (minutesLeft <= ConfigHandler.alertBeforeMinutes && !alertSent.getOrDefault(bossName, false)) {

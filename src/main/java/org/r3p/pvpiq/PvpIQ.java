@@ -7,6 +7,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
+import org.r3p.pvpiq.config.ConfigHandler;
+import org.r3p.pvpiq.crafting.CraftingRequirementsRenderer;
+import org.r3p.pvpiq.handlers.*;
+import org.r3p.pvpiq.overlay.TimerOverlay;
 
 @Mod(modid = PvpIQ.MODID, name = PvpIQ.NAME, version = PvpIQ.VERSION, acceptedMinecraftVersions = "[1.8,1.8.9]", clientSideOnly = true)
 public class PvpIQ {
@@ -17,6 +21,8 @@ public class PvpIQ {
     public static ChatEventHandler chatEventHandler = new ChatEventHandler();
     public static KeyInputHandler keyInputHandler = new KeyInputHandler();
     public static TimerOverlay timerOverlay = new TimerOverlay();
+    public static GuiEventHandler guiEventHandler = new GuiEventHandler();
+    public static CraftingRequirementsRenderer craftingRequirementsRenderer;
 
     public static KeyBinding modeSwitchKey;
     public static KeyBinding openGuiKey;
@@ -34,6 +40,10 @@ public class PvpIQ {
         MinecraftForge.EVENT_BUS.register(timerOverlay);
         MinecraftForge.EVENT_BUS.register(new InputHandler());
         MinecraftForge.EVENT_BUS.register(new MouseInputHandler());
+        MinecraftForge.EVENT_BUS.register(guiEventHandler);
+
+        craftingRequirementsRenderer = new CraftingRequirementsRenderer(guiEventHandler);
+        MinecraftForge.EVENT_BUS.register(craftingRequirementsRenderer);
 
         modeSwitchKey = new KeyBinding("Toggle Mode", Keyboard.KEY_M, "PVPIQ - QOL");
         openGuiKey = new KeyBinding("Open Timer GUI", Keyboard.KEY_G, "PVPIQ - QOL");

@@ -1,8 +1,9 @@
-package org.r3p.pvpiq;
+package org.r3p.pvpiq.handlers;
 
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
+import org.r3p.pvpiq.PvpIQ;
 
 public class InputHandler {
 

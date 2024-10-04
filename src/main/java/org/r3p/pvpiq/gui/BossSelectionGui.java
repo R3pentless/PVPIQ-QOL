@@ -1,8 +1,12 @@
-package org.r3p.pvpiq;
+package org.r3p.pvpiq.gui;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.Minecraft;
+import org.r3p.pvpiq.PvpIQ;
+import org.r3p.pvpiq.boss.BossInfo;
+import org.r3p.pvpiq.boss.BossManager;
+import org.r3p.pvpiq.config.ConfigHandler;
 
 import java.io.IOException;
 import java.util.List;

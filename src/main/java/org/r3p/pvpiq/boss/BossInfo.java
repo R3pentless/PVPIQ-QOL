@@ -1,4 +1,4 @@
-package org.r3p.pvpiq;
+package org.r3p.pvpiq.boss;
 
 import java.util.List;
 

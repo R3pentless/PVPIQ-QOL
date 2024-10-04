@@ -1,7 +1,6 @@
-package org.r3p.pvpiq;
+package org.r3p.pvpiq.config;
 
 import net.minecraftforge.common.config.Configuration;
-
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
@@ -28,12 +27,9 @@ public class ConfigHandler {
         posX = config.getInt("posX", Configuration.CATEGORY_GENERAL, 10, 0, Integer.MAX_VALUE, "Timer X Position");
         posY = config.getInt("posY", Configuration.CATEGORY_GENERAL, 10, 0, Integer.MAX_VALUE, "Timer Y Position");
         scale = (float) config.get(Configuration.CATEGORY_GENERAL, "scale", 1.0, "Timer Scale").getDouble(1.0);
-
         isAkademiaMode = config.getBoolean("isAkademiaMode", Configuration.CATEGORY_GENERAL, false, "Is Akademia Mode");
 
-        String[] defaultBosses = {};
-        String[] savedBosses = config.getStringList("visibleBosses", Configuration.CATEGORY_GENERAL, defaultBosses, "Visible Bosses");
-
+        String[] savedBosses = config.getStringList("visibleBosses", Configuration.CATEGORY_GENERAL, new String[]{}, "Visible Bosses");
         visibleBosses = new ArrayList<>(Arrays.asList(savedBosses));
 
         showSpawnAlert = config.getBoolean("showSpawnAlert", Configuration.CATEGORY_GENERAL, true, "Show Boss Spawn Alert");
@@ -44,26 +40,30 @@ public class ConfigHandler {
         }
     }
 
-    public static void saveConfig(int x, int y, float s) {
-        config.get(Configuration.CATEGORY_GENERAL, "posX", x).set(x);
-        config.get(Configuration.CATEGORY_GENERAL, "posY", y).set(y);
-        config.get(Configuration.CATEGORY_GENERAL, "scale", s).set(s);
+    public static void saveConfig() {
+        config.get(Configuration.CATEGORY_GENERAL, "posX", posX).set(posX);
+        config.get(Configuration.CATEGORY_GENERAL, "posY", posY).set(posY);
+        config.get(Configuration.CATEGORY_GENERAL, "scale", scale).set(scale);
+        config.get(Configuration.CATEGORY_GENERAL, "isAkademiaMode", isAkademiaMode).set(isAkademiaMode);
+        config.get(Configuration.CATEGORY_GENERAL, "visibleBosses", new String[]{}).set(visibleBosses.toArray(new String[0]));
+        config.get(Configuration.CATEGORY_GENERAL, "showSpawnAlert", showSpawnAlert).set(showSpawnAlert);
+        config.get(Configuration.CATEGORY_GENERAL, "alertBeforeMinutes", alertBeforeMinutes).set(alertBeforeMinutes);
         config.save();
     }
 
-    public static void saveMode(boolean isAkademiaMode) {
+    public static void saveMode() {
         config.get(Configuration.CATEGORY_GENERAL, "isAkademiaMode", isAkademiaMode).set(isAkademiaMode);
         config.save();
     }
 
-    public static void saveVisibleBosses(List<String> bosses) {
-        config.get(Configuration.CATEGORY_GENERAL, "visibleBosses", new String[]{}).set(bosses.toArray(new String[0]));
+    public static void saveVisibleBosses() {
+        config.get(Configuration.CATEGORY_GENERAL, "visibleBosses", new String[]{}).set(visibleBosses.toArray(new String[0]));
         config.save();
     }
 
     public static void saveAlertSettings(boolean showAlert, int minutesBefore) {
-        config.get(Configuration.CATEGORY_GENERAL, "showSpawnAlert", showAlert).set(showAlert);
-        config.get(Configuration.CATEGORY_GENERAL, "alertBeforeMinutes", minutesBefore).set(minutesBefore);
-        config.save();
+        showSpawnAlert = showAlert;
+        alertBeforeMinutes = minutesBefore;
+        saveConfig();
     }
 }

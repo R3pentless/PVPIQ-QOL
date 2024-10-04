@@ -1,4 +1,4 @@
-package org.r3p.pvpiq;
+package org.r3p.pvpiq.overlay;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -7,15 +7,15 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Mouse;
+import org.r3p.pvpiq.PvpIQ;
+import org.r3p.pvpiq.boss.BossInfo;
+import org.r3p.pvpiq.config.ConfigHandler;
+
 import java.util.List;
 
 public class TimerOverlay {
 
     private Minecraft mc = Minecraft.getMinecraft();
-
-    public int posX = ConfigHandler.posX;
-    public int posY = ConfigHandler.posY;
-    public float scale = ConfigHandler.scale;
 
     private boolean dragging = false;
     private int dragOffsetX;
@@ -35,20 +35,18 @@ public class TimerOverlay {
             return;
         }
         GlStateManager.pushMatrix();
-        GlStateManager.scale(scale, scale, 1);
-        GlStateManager.translate(posX / scale, posY / scale, 0);
+        GlStateManager.scale(ConfigHandler.scale, ConfigHandler.scale, 1);
+        GlStateManager.translate(ConfigHandler.posX / ConfigHandler.scale, ConfigHandler.posY / ConfigHandler.scale, 0);
         int y = 0;
         for (BossInfo boss : visibleBosses) {
             String bossName = boss.getBossName();
             String displayString;
             long timeLeft = 0;
-            boolean hasActiveTimer = false;
             if (PvpIQ.chatEventHandler.getBossTimers().containsKey(bossName)) {
                 timeLeft = PvpIQ.chatEventHandler.getBossTimers().get(bossName) - System.currentTimeMillis();
                 if (timeLeft <= 0) {
                     displayString = "§c" + bossName + "§r: §6Mozliwy Boss";
                 } else {
-                    hasActiveTimer = true;
                     String timeString = formatTime(timeLeft);
                     displayString = "§c" + bossName + "§r: §6" + timeString;
                 }
@@ -68,35 +66,40 @@ public class TimerOverlay {
         if (!PvpIQ.keyInputHandler.isEditing()) {
             return;
         }
+
         ScaledResolution scaledResolution = new ScaledResolution(mc);
         int scaledWidth = scaledResolution.getScaledWidth();
         int scaledHeight = scaledResolution.getScaledHeight();
+
         int mouseX = Mouse.getEventX() * scaledWidth / mc.displayWidth;
         int mouseY = scaledHeight - Mouse.getEventY() * scaledHeight / mc.displayHeight - 1;
+
         if (Mouse.getEventButton() == 0) {
             if (Mouse.getEventButtonState()) {
                 if (!dragging) {
                     dragging = true;
-                    dragOffsetX = mouseX - posX;
-                    dragOffsetY = mouseY - posY;
+                    dragOffsetX = mouseX - ConfigHandler.posX;
+                    dragOffsetY = mouseY - ConfigHandler.posY;
                 }
             } else {
                 dragging = false;
             }
         }
+
         if (dragging) {
-            posX = mouseX - dragOffsetX;
-            posY = mouseY - dragOffsetY;
-            ConfigHandler.saveConfig(posX, posY, scale);
+            ConfigHandler.posX = mouseX - dragOffsetX;
+            ConfigHandler.posY = mouseY - dragOffsetY;
+            ConfigHandler.saveConfig();
         }
+
         int dWheel = Mouse.getDWheel();
         if (dWheel != 0) {
             if (dWheel > 0) {
-                scale += 0.1f;
+                ConfigHandler.scale += 0.1f;
             } else {
-                scale = Math.max(0.1f, scale - 0.1f);
+                ConfigHandler.scale = Math.max(0.1f, ConfigHandler.scale - 0.1f);
             }
-            ConfigHandler.saveConfig(posX, posY, scale);
+            ConfigHandler.saveConfig();
         }
     }
 

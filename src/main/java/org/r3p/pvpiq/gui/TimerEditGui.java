@@ -1,16 +1,15 @@
-package org.r3p.pvpiq;
+package org.r3p.pvpiq.gui;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.Minecraft;
+import org.r3p.pvpiq.PvpIQ;
+import org.r3p.pvpiq.config.ConfigHandler;
 
 import java.io.IOException;
 
 public class TimerEditGui extends GuiScreen {
 
-    private TimerOverlay timerOverlay;
-
     public TimerEditGui() {
-        this.timerOverlay = PvpIQ.timerOverlay;
     }
 
     @Override
@@ -22,23 +21,27 @@ public class TimerEditGui extends GuiScreen {
     public void onGuiClosed() {
         Minecraft.getMinecraft().mouseHelper.grabMouseCursor();
         PvpIQ.keyInputHandler.setEditing(false);
+        ConfigHandler.saveConfig();
     }
 
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
-        timerOverlay.handleMouseInput();
+        PvpIQ.timerOverlay.handleMouseInput();
     }
 
     @Override
     public void handleKeyboardInput() throws IOException {
         super.handleKeyboardInput();
+        if (PvpIQ.editTimersKey.isPressed()) {
+            Minecraft.getMinecraft().displayGuiScreen(null);
+        }
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        timerOverlay.renderTimers(true);
+        PvpIQ.timerOverlay.renderTimers(true);
     }
 
     @Override
